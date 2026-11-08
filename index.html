@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathTutor · Геометрия 11 класс — расширенный тренажёр</title>
+<style>
+  :root{
+    --bg-1:#0f0c29; --bg-2:#302b63; --bg-3:#24243e;
+    --accent:#7c5cff; --accent-2:#00d4ff; --accent-3:#ff6ec7;
+    --glass:rgba(255,255,255,0.08); --glass-border:rgba(255,255,255,0.15);
+    --text:#eaeaff; --muted:#a5a3c7;
+    --success:#2ecc71; --danger:#ff5c7a; --warn:#f1c40f;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Segoe UI', system-ui, sans-serif;
+    color:var(--text);
+    background:linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
+    background-size:400% 400%;
+    animation:gradientMove 18s ease infinite;
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px; overflow-x:hidden;
+  }
+  @keyframes gradientMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  .bg-symbols{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0;}
+  .bg-symbols span{position:absolute; font-size:clamp(40px,6vw,90px); font-weight:700; color:rgba(255,255,255,0.04); animation:float 20s linear infinite; user-select:none;}
+  @keyframes float{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-40px) rotate(15deg)}100%{transform:translateY(0) rotate(0)}}
+  .app{position:relative; z-index:1; width:100%; max-width:980px;
+    background:var(--glass); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-border); border-radius:28px; padding:40px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+    animation:fadeIn 0.6s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(20px)}to{opacity:1; transform:translateY(0)}}
+  .hidden{display:none !important;}
+  h1{font-size:clamp(24px,4vw,38px); font-weight:800;
+    background:linear-gradient(135deg, var(--accent-2), var(--accent-3));
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:12px; letter-spacing:-0.5px;}
+  h2{font-size:22px; margin:20px 0 12px; font-weight:700;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:16px; line-height:1.5;}
+  input[type="text"], input[type="password"]{
+    width:100%; padding:16px 20px; margin-bottom:14px;
+    border-radius:14px; border:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.05); color:var(--text);
+    font-size:16px; transition:all 0.25s; outline:none; font-family:inherit;
+  }
+  input::placeholder{color:var(--muted);}
+  input:focus{border-color:var(--accent-2); background:rgba(255,255,255,0.09); box-shadow:0 0 0 4px rgba(0,212,255,0.15);}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:14px 26px; border:none; border-radius:14px; font-size:15px; font-weight:600;
+    color:#fff; cursor:pointer;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    transition:all 0.25s; box-shadow:0 8px 24px rgba(124,92,255,0.35);
+    margin:6px 6px 6px 0; text-decoration:none; font-family:inherit;}
+  .btn:hover{transform:translateY(-2px); box-shadow:0 12px 32px rgba(124,92,255,0.55);}
+  .btn.secondary{background:rgba(255,255,255,0.08); border:1px solid var(--glass-border); box-shadow:none;}
+  .btn.secondary:hover{background:rgba(255,255,255,0.15);}
+  .btn-start{width:100%; padding:18px; font-size:17px; margin-top:8px;}
+  .form-error{display:none; margin:-4px 0 14px; padding:12px 16px; border-radius:12px;
+    background:rgba(255,92,122,0.15); border:1px solid rgba(255,92,122,0.4);
+    color:var(--danger); font-size:14px; font-weight:500; animation:fadeIn 0.3s ease;}
+  .form-error.show{display:block;}
+  .qr-box{margin-top:32px; padding:24px; text-align:center;
+    background:rgba(255,255,255,0.04); border:1px dashed var(--glass-border); border-radius:20px;}
+  .qr-box p{color:var(--muted); margin-bottom:16px; font-size:14px;}
+  #qrcode{display:inline-block; padding:14px; background:#fff; border-radius:16px; min-height:60px; min-width:60px;}
+  .qr-placeholder{color:#666; font-size:12px; padding:20px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-top:24px;}
+  .card{padding:24px; border-radius:20px; background:rgba(255,255,255,0.05);
+    border:1px solid var(--glass-border); transition:all 0.3s ease; cursor:pointer; position:relative; overflow:hidden;}
+  .card:hover{transform:translateY(-4px); border-color:var(--accent-2); box-shadow:0 16px 40px rgba(124,92,255,0.3);}
+  .card .icon{font-size:32px; margin-bottom:12px; display:block;}
+  .card h3{font-size:17px; margin-bottom:6px;}
+  .card p{color:var(--muted); font-size:13px; line-height:1.4;}
+
+  /* ===== Справочник ===== */
+  .reference-panel{margin-top:24px; padding:28px; background:rgba(0,0,0,0.25);
+    border-radius:20px; border:1px solid var(--glass-border); animation:fadeIn 0.4s ease;
+    max-height:70vh; overflow-y:auto;}
+  .reference-panel::-webkit-scrollbar{width:8px;}
+  .reference-panel::-webkit-scrollbar-thumb{background:var(--accent); border-radius:4px;}
+  .ref-section{margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.06);}
+  .ref-section:last-child{border-bottom:none;}
+  .ref-section h3{color:var(--accent-2); margin-bottom:14px; font-size:18px;
+    display:flex; align-items:center; gap:8px;}
+  .ref-section h4{color:var(--accent-3); margin:14px 0 8px; font-size:15px; font-weight:600;}
+  .ref-section p{color:var(--muted); line-height:1.7; font-size:14px; padding:4px 0;}
+  .formula{display:inline-block; padding:6px 14px; background:rgba(124,92,255,0.15);
+    border-radius:8px; font-family:'Courier New', monospace; color:var(--accent-2);
+    margin:6px 4px 6px 0; font-weight:600; font-size:14px;}
+  .example{padding:14px 18px; margin:10px 0; background:rgba(0,212,255,0.06);
+    border-left:3px solid var(--accent-2); border-radius:6px; font-size:14px; color:var(--muted); line-height:1.6;}
+  .example strong{color:var(--accent-2);}
+
+  /* ===== Вопросы ===== */
+  .question-area{margin-top:24px; padding:28px; background:rgba(0,0,0,0.2);
+    border-radius:20px; border:1px solid var(--glass-border);}
+  .question-text{font-size:18px; font-weight:600; margin-bottom:20px; line-height:1.5;}
+  .figure{text-align:center; padding:16px; margin-bottom:16px;
+    background:rgba(255,255,255,0.04); border-radius:16px;}
+  .figure svg{max-width:200px; height:auto; filter:drop-shadow(0 4px 12px rgba(124,92,255,0.3));}
+  .test-option{display:flex; align-items:center; gap:12px; padding:16px 20px; margin:10px 0;
+    background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);
+    border-radius:14px; cursor:pointer; transition:all 0.25s; font-size:15px;}
+  .test-option::before{content:''; width:18px; height:18px; border-radius:50%;
+    border:2px solid var(--muted); transition:all 0.25s; flex-shrink:0;}
+  .test-option:hover{background:rgba(124,92,255,0.15); border-color:var(--accent); transform:translateX(4px);}
+  .test-option.correct{background:rgba(46,204,113,0.2); border-color:var(--success);}
+  .test-option.correct::before{background:var(--success); border-color:var(--success);}
+  .test-option.wrong{background:rgba(255,92,122,0.2); border-color:var(--danger);}
+  .test-option.wrong::before{background:var(--danger); border-color:var(--danger);}
+  .test-option.disabled{pointer-events:none; opacity:0.85;}
+  .feedback{margin:16px 0; padding:14px 20px; border-radius:12px; font-weight:600; font-size:15px; animation:fadeIn 0.3s ease;}
+  .feedback.ok{background:rgba(46,204,113,0.15); color:var(--success); border:1px solid rgba(46,204,113,0.4);}
+  .feedback.bad{background:rgba(255,92,122,0.15); color:var(--danger); border:1px solid rgba(255,92,122,0.4);}
+  .progress{height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; margin-bottom:20px;}
+  .progress-bar{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+    border-radius:3px; transition:width 0.4s ease; background-size:200% 100%; animation:shimmer 2s linear infinite;}
+  @keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+  .test-header{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;}
+  .test-counter{color:var(--muted); font-size:14px; padding:6px 14px;
+    background:rgba(255,255,255,0.05); border-radius:20px; border:1px solid var(--glass-border);}
+  .difficulty{display:inline-block; padding:3px 10px; border-radius:10px; font-size:11px;
+    font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-left:8px; vertical-align:middle;}
+  .diff-easy{background:rgba(46,204,113,0.2); color:var(--success);}
+  .diff-mid{background:rgba(241,196,15,0.2); color:var(--warn);}
+  .diff-hard{background:rgba(255,92,122,0.2); color:var(--danger);}
+  .hint-box{margin-top:14px; padding:12px 16px; border-radius:10px;
+    background:rgba(241,196,15,0.08); border:1px dashed rgba(241,196,15,0.4);
+    color:var(--warn); font-size:13px; line-height:1.5;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .shake{animation:shake 0.4s;}
+  @media(max-width:600px){
+    .app{padding:24px 18px; border-radius:20px;}
+    .btn{width:100%; margin:6px 0;}
+    .card{padding:20px;}
+    .question-area{padding:20px;}
+    .reference-panel{padding:18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-symbols">
+  <span style="top:10%; left:5%;">π</span>
+  <span style="top:70%; left:85%;">∑</span>
+  <span style="top:30%; left:90%;">√</span>
+  <span style="top:80%; left:10%;">∫</span>
+  <span style="top:50%; left:50%;">△</span>
+  <span style="top:20%; left:40%;">θ</span>
+  <span style="top:60%; left:25%;">∅</span>
+  <span style="top:40%; left:75%;">∠</span>
+</div>
+
+<div class="app">
+
+  <!-- СТРАНИЦА 1 -->
+  <div id="page-home">
+    <h1>🎓 MathTutor</h1>
+    <p class="subtitle">Расширенный математический тренажёр по геометрии для 11 класса.<br>Тригонометрия · Стереометрия · Тела вращения · Векторы</p>
+    <h2>Регистрация (демо)</h2>
+    <div id="form-error" class="form-error"></div>
+    <input type="text" id="reg-name" placeholder="Ваше имя" autocomplete="off">
+    <input type="password" id="reg-pass" placeholder="Пароль (минимум 4 символа)" autocomplete="new-password">
+    <button type="button" class="btn btn-start" id="start-btn">✨ Начать обучение</button>
+    <div class="qr-box">
+      <p>📱 Отсканируйте QR-код, чтобы открыть тренажёр на телефоне</p>
+      <div id="qrcode"><div class="qr-placeholder">QR-код загружается…</div></div>
+    </div>
+  </div>
+
+  <!-- СТРАНИЦА 2 -->
+  <div id="page-dashboard" class="hidden">
+    <h1 id="greeting">Привет! 👋</h1>
+    <p class="subtitle">Выбери раздел для тренировки</p>
+    <div class="grid">
+      <div class="card" data-action="reference">
+        <span class="icon">📚</span><h3>Справочник</h3>
+        <p>Подробные формулы, теоремы, примеры решений и построений</p>
+      </div>
+      <div class="card" data-action="test-simple">
+        <span class="icon">✅</span><h3>Тест: выбор ответа</h3>
+        <p>15 вопросов с вариантами — от простых к сложным</p>
+      </div>
+      <div class="card" data-action="test-input">
+        <span class="icon">✏️</span><h3>Тест: ввод ответа</h3>
+        <p>12 вычислительных задач с фигурами — впиши ответ</p>
+      </div>
+      <div class="card" data-action="test-mixed">
+        <span class="icon">🎲</span><h3>Смешанный тест</h3>
+        <p>20 случайных вопросов из всей базы</p>
+      </div>
+    </div>
+    <button class="btn secondary" style="margin-top:24px;" id="logout-btn">🚪 Выйти</button>
+
+    <!-- СПРАВОЧНИК (расширен в 3 раза) -->
+    <div id="reference-content" class="reference-panel hidden">
+      <h2>📖 Справочные материалы</h2>
+
+      <!-- 1. ТРИГОНОМЕТРИЯ -->
+      <div class="ref-section">
+        <h3>📐 1. Тригонометрия</h3>
+
+        <h4>Основные тождества</h4>
+        <span class="formula">sin²α + cos²α = 1</span>
+        <span class="formula">tg α = sin α / cos α</span>
+        <span class="formula">ctg α = cos α / sin α</span>
+        <span class="formula">1 + tg²α = 1/cos²α</span>
+        <span class="formula">1 + ctg²α = 1/sin²α</span>
+
+        <h4>Формулы сложения</h4>
+        <span class="formula">sin(α ± β) = sin α cos β ± cos α sin β</span>
+        <span class="formula">cos(α ± β) = cos α cos β ∓ sin α sin β</span>
+        <span class="formula">tg(α ± β) = (tg α ± tg β) / (1 ∓ tg α · tg β)</span>
+
+        <h4>Формулы двойного и половинного угла</h4>
+        <span class="formula">sin 2α = 2 sin α cos α</span>
+        <span class="formula">cos 2α = cos²α − sin²α = 1 − 2sin²α = 2cos²α − 1</span>
+        <span class="formula">tg 2α = 2tg α / (1 − tg²α)</span>
+        <span class="formula">sin(α/2) = ±√((1 − cos α)/2)</span>
+        <span class="formula">cos(α/2) = ±√((1 + cos α)/2)</span>
+
+        <h4>Сумма и разность</h4>
+        <span class="formula">sin α + sin β = 2 sin((α+β)/2) cos((α−β)/2)</span>
+        <span class="formula">sin α − sin β = 2 sin((α−β)/2) cos((α+β)/2)</span>
+        <span class="formula">cos α + cos β = 2 cos((α+β)/2) cos((α−β)/2)</span>
+
+        <h4>Формулы приведения (мнемоника)</h4>
+        <p>π/2 ± α, 3π/2 ± α → функция меняется на кофункцию (sin↔cos, tg↔ctg).<br>
+        π ± α, 2π ± α → функция не меняется.<br>
+        Знак определяется по четверти исходного угла.</p>
+
+        <h4>Теоремы синусов и косинусов</h4>
+        <span class="formula">a/sin A = b/sin B = c/sin C = 2R</span>
+        <span class="formula">c² = a² + b² − 2ab·cos C</span>
+
+        <div class="example">
+          <strong>Пример.</strong> Найти sin 2α, если sin α = 3/5 и α — острый.<br>
+          cos α = √(1 − 9/25) = 4/5.<br>
+          sin 2α = 2 · (3/5) · (4/5) = <strong>24/25</strong>.
+        </div>
+      </div>
+
+      <!-- 2. ПРЯМЫЕ И ПЛОСКОСТИ -->
+      <div class="ref-section">
+        <h3>📏 2. Свойства прямых и плоскостей</h3>
+
+        <h4>Аксиомы стереометрии</h4>
+        <p>• Через 3 точки, не лежащие на одной прямой, проходит единственная плоскость.<br>
+        • Если 2 точки прямой лежат в плоскости, то вся прямая лежит в ней.<br>
+        • Если 2 плоскости имеют общую точку, они пересекаются по прямой.</p>
+
+        <h4>Параллельность</h4>
+        <p><strong>Признак параллельности прямой и плоскости:</strong> прямая параллельна плоскости, если она параллельна какой-либо прямой в этой плоскости.</p>
+        <p><strong>Признак параллельности плоскостей:</strong> две плоскости параллельны, если 2 пересекающиеся прямые одной плоскости параллельны двум прямым другой.</p>
+
+        <h4>Перпендикулярность</h4>
+        <p>Прямая ⟂ плоскости, если она ⟂ двум пересекающимся прямым этой плоскости.</p>
+        <p><strong>Теорема о трёх перпендикулярах:</strong> если наклонная ⟂ прямой в плоскости, то и её проекция ⟂ этой прямой.</p>
+        <span class="formula">Расстояние от точки до плоскости = длина перпендикуляра</span>
+
+        <h4>Углы в пространстве</h4>
+        <p><strong>Угол между скрещивающимися прямыми</strong> — угол между параллельными им пересекающимися прямыми. Принадлежит (0°; 90°].</p>
+        <p><strong>Угол между прямой и плоскостью</strong> — угол между прямой и её проекцией на плоскость.</p>
+        <p><strong>Угол между плоскостями</strong> = линейный угол двугранного угла (перпендикуляры к линии пересечения).</p>
+
+        <div class="example">
+          <strong>Пример.</strong> Куб ABCDA₁B₁C₁D₁. Найти угол между AB₁ и BC₁.<br>
+          AB₁ ∥ DC₁, значит ищем угол между DC₁ и BC₁.<br>
+          Треугольник BDC₁ — равносторонний (все стороны — диагонали граней), угол = <strong>60°</strong>.
+        </div>
+      </div>
+
+      <!-- 3. МНОГОГРАННИКИ -->
+      <div class="ref-section">
+        <h3>🧊 3. Многогранники — площади и объёмы</h3>
+
+        <h4>Призма</h4>
+        <span class="formula">S_бок = P_осн · h</span>
+        <span class="formula">S_полн = S_бок + 2S_осн</span>
+        <span class="formula">V = S_осн · h</span>
+        <p>Прямоугольный параллелепипед (a, b, c):</p>
+        <span class="formula">V = abc</span>
+        <span class="formula">S_полн = 2(ab + bc + ac)</span>
+        <span class="formula">d² = a² + b² + c²</span>
+
+        <h4>Пирамида</h4>
+        <span class="formula">V = ⅓ · S_осн · h</span>
+        <span class="formula">S_бок = ½ · P_осн · апофема (для правильной)</span>
+        <p>Правильная треугольная пирамида, сторона a, апофема m:</p>
+        <span class="formula">S_бок = 3/2 · a · m</span>
+        <p>Правильная четырёхугольная (сторона a, апофема m):</p>
+        <span class="formula">S_бок = 2a · m</span>
+
+        <h4>Куб (ребро a)</h4>
+        <span class="formula">V = a³</span>
+        <span class="formula">S = 6a²</span>
+        <span class="formula">d = a√3</span>
+
+        <h4>Тетраэдр и октаэдр (правильные)</h4>
+        <span class="formula">V_тетр = a³√2 / 12</span>
+        <span class="formula">S_тетр = a²√3</span>
+
+        <div class="example">
+          <strong>Пример.</strong> Правильная четырёхугольная пирамида: a = 6, h = 4.<br>
+          Апофема m = √(h² + (a/2)²) = √(16 + 9) = 5.<br>
+          S_бок = 2 · 6 · 5 = <strong>60</strong>.<br>
+          V = ⅓ · 6² · 4 = <strong>48</strong>.
+        </div>
+      </div>
+
+      <!-- 4. ТЕЛА ВРАЩЕНИЯ -->
+      <div class="ref-section">
+        <h3>⚪ 4. Тела вращения</h3>
+
+        <h4>Цилиндр (R — радиус, h — высота)</h4>
+        <span class="formula">S_бок = 2πRh</span>
+        <span class="formula">S_полн = 2πR(R + h)</span>
+        <span class="formula">V = πR²h</span>
+
+        <h4>Конус (R — радиус, h — высота, l — образующая)</h4>
+        <span class="formula">l² = R² + h²</span>
+        <span class="formula">S_бок = πRl</span>
+        <span class="formula">S_полн = πR(R + l)</span>
+        <span class="formula">V = ⅓πR²h</span>
+
+        <h4>Усечённый конус</h4>
+        <span class="formula">V = ⅓πh(R₁² + R₁R₂ + R₂²)</span>
+
+        <h4>Шар и сфера (R — радиус)</h4>
+        <span class="formula">S_сферы = 4πR²</span>
+        <span class="formula">V_шара = 4/3πR³</span>
+        <p>Шаровой сегмент (высота h):</p>
+        <span class="formula">V_сегм = πh²(R − h/3)</span>
+
+        <div class="example">
+          <strong>Пример.</strong> Конус: R = 3, h = 4.<br>
+          l = √(9 + 16) = 5.<br>
+          S_бок = π · 3 · 5 = <strong>15π</strong>.<br>
+          V = ⅓π · 9 · 4 = <strong>12π</strong>.
+        </div>
+      </div>
+
+      <!-- 5. ВЕКТОРЫ -->
+      <div class="ref-section">
+        <h3>➡️ 5. Векторы и координаты</h3>
+
+        <h4>Действия с векторами</h4>
+        <span class="formula">a + b = (aₓ+bₓ; a_y+b_y; a_z+b_z)</span>
+        <span class="formula">|a| = √(aₓ² + a_y² + a_z²)</span>
+        <span class="formula">a · b = |a|·|b|·cos φ</span>
+        <span class="formula">a · b = aₓbₓ + a_yb_y + a_zb_z</span>
+
+        <h4>Угол между векторами</h4>
+        <span class="formula">cos φ = (a·b) / (|a|·|b|)</span>
+
+        <h4>Расстояние между точками</h4>
+        <span class="formula">AB = √((x₂−x₁)² + (y₂−y₁)² + (z₂−z₁)²)</span>
+
+        <div class="example">
+          <strong>Пример.</strong> A(1,2,3), B(4,6,3). Найти AB.<br>
+          AB = √(9 + 16 + 0) = <strong>5</strong>.
+        </div>
+      </div>
+
+      <!-- 6. ПОСТРОЕНИЯ -->
+      <div class="ref-section">
+        <h3>✏️ 6. Примеры построений сечений</h3>
+
+        <h4>Метод следов</h4>
+        <p>1. Находим линию пересечения секущей плоскости с плоскостью основания — «след».<br>
+        2. Соединяем точки, лежащие в одной грани.<br>
+        3. Продолжаем до пересечения с рёбрами, повторяем.</p>
+
+        <h4>Метод вспомогательных плоскостей</h4>
+        <p>Через две точки сечения и третью точку вне их плоскости проводим вспомогательную плоскость; находим её пересечения с гранями — так получаем новые точки.</p>
+
+        <h4>Типичные задачи</h4>
+        <p>• <strong>Сечение куба плоскостью через 3 точки</strong> — может быть треугольник, четырёхугольник, пятиугольник или шестиугольник.<br>
+        • <strong>Сечение пирамиды параллельно основанию</strong> — подобная фигура, коэффициент подобия = k = h'/h.<br>
+        • <strong>Диагональное сечение призмы</strong> — параллелограмм, проходящий через диагональ основания и боковое ребро.</p>
+      </div>
+
+      <button class="btn secondary" id="close-ref-btn">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- СТРАНИЦА 3 -->
+  <div id="page-test" class="hidden">
+    <div class="test-header">
+      <h1 id="test-title">Тест</h1>
+      <span class="test-counter" id="test-counter">1 / 1</span>
+    </div>
+    <div class="progress"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+    <div id="question-area" class="question-area"></div>
+    <div id="feedback-area"></div>
+    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn" id="next-btn">Следующий →</button>
+      <button class="btn secondary" id="back-menu-btn">← В меню</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ================= БАЗА ВОПРОСОВ =================
+// diff: easy / mid / hard
+const questions = [
+  // ===== ВЫБОР ОТВЕТА (15) =====
+  { type:'choice', diff:'easy', text:'Чему равно sin²α + cos²α?',
+    options:['0','1','2','sin α'], correct:'1' },
+
+  { type:'choice', diff:'easy', text:'Формула объёма цилиндра:',
+    options:['πR²h','4/3 πR³','1/3 πR²h','2πRh'], correct:'πR²h' },
+
+  { type:'choice', diff:'easy', text:'Площадь поверхности сферы радиуса R равна:',
+    options:['πR²','4πR²','2πR','4/3 πR³'], correct:'4πR²' },
+
+  { type:'choice', diff:'mid', text:'Угол между скрещивающимися прямыми в пространстве…',
+    options:['Всегда 90°','Может быть любым в (0°; 90°]','Всегда 0°','Не существует'], correct:'Может быть любым в (0°; 90°]' },
+
+  { type:'choice', diff:'mid', text:'cos 2α равен:',
+    options:['cos²α − sin²α','2sin α','1 + sin²α','sin α cos α'], correct:'cos²α − sin²α' },
+
+  { type:'choice', diff:'mid', text:'Прямая перпендикулярна плоскости, если она…',
+    options:['перпендикулярна одной прямой этой плоскости',
+             'перпендикулярна двум параллельным прямым плоскости',
+             'перпендикулярна двум пересекающимся прямым плоскости',
+             'параллельна нормали к любой прямой'], correct:'перпендикулярна двум пересекающимся прямым плоскости' },
+
+  { type:'choice', diff:'mid', text:'Теорема о трёх перпендикулярах утверждает, что…',
+    options:['наклонная ⟂ прямой тогда и только тогда, когда её проекция ⟂ этой прямой',
+             'все перпендикуляры параллельны',
+             'перпендикуляр короче любой наклонной',
+             'прямая ⟂ плоскости ⟂ любой прямой'], correct:'наклонная ⟂ прямой тогда и только тогда, когда её проекция ⟂ этой прямой' },
+
+  { type:'choice', diff:'hard', text:'sin(α + β) равен:',
+    options:['sin α + sin β','sin α cos β + cos α sin β','cos α cos β − sin α sin β','tg α · tg β'], correct:'sin α cos β + cos α sin β' },
+
+  { type:'choice', diff:'hard', text:'Объём усечённого конуса с радиусами R₁, R₂ и высотой h:',
+    options:['⅓πh(R₁² + R₁R₂ + R₂²)','πh(R₁ + R₂)','⅓πR₁R₂h','πh(R₁² − R₂²)'], correct:'⅓πh(R₁² + R₁R₂ + R₂²)' },
+
+  { type:'choice', diff:'hard', text:'Диагональ прямоугольного параллелепипеда с рёбрами a, b, c:',
+    options:['a + b + c','√(a² + b² + c²)','√(ab + bc + ac)','(a+b+c)/2'], correct:'√(a² + b² + c²)' },
+
+  { type:'choice', diff:'mid', text:'Правильная треугольная пирамида — это пирамида, у которой…',
+    options:['все рёбра равны','основание — правильный треугольник, вершина проецируется в его центр',
+             'все углы при вершине прямые','апофемы равны высоте'], correct:'основание — правильный треугольник, вершина проецируется в его центр' },
+
+  { type:'choice', diff:'mid', text:'Если две плоскости параллельны, то любая прямая одной плоскости…',
+    options:['пересекает другую','параллельна другой плоскости','перпендикулярна другой','лежит в другой'], correct:'параллельна другой плоскости' },
+
+  { type:'choice', diff:'hard', text:'Формула sin α − sin β:',
+    options:['2 sin((α−β)/2) cos((α+β)/2)','2 cos((α+β)/2) sin((α−β)/2)',
+             'sin α cos β − cos α sin β','2 sin α sin β'], correct:'2 sin((α−β)/2) cos((α+β)/2)' },
+
+  { type:'choice', diff:'hard', text:'Теорема косинусов для треугольника со сторонами a, b, c и углом C:',
+    options:['c² = a² + b² − 2ab cos C','c² = a² + b² + 2ab cos C',
+             'c = a + b − cos C','c = (a + b)/2 · cos C'], correct:'c² = a² + b² − 2ab cos C' },
+
+  { type:'choice', diff:'mid', text:'Сколько плоскостей можно провести через три точки, лежащие на одной прямой?',
+    options:['Одну','Две','Бесконечно много','Ни одной'], correct:'Бесконечно много' },
+
+  // ===== ВВОД ОТВЕТА (12) =====
+  { type:'input', diff:'easy',
+    text:'Найдите объём прямоугольного параллелепипеда с измерениями 2, 3 и 4.',
+    correct:'24',
+    figure:'<svg viewBox="0 0 120 120"><g fill="none" stroke="#00d4ff" stroke-width="2.5" stroke-linejoin="round"><rect x="15" y="45" width="70" height="45" rx="2"/><polygon points="15,45 35,25 105,25 85,45"/><polygon points="85,45 105,25 105,70 85,90"/></g><text x="50" y="72" fill="#7c5cff" font-size="10" font-weight="bold">2×3×4</text></svg>' },
+
+  { type:'input', diff:'easy',
+    text:'Радиус основания цилиндра 2, высота 5. Найдите V/π.',
+    correct:'20',
+    figure:'<svg viewBox="0 0 120 120"><g fill="none" stroke="#00d4ff" stroke-width="2.5"><ellipse cx="60" cy="30" rx="35" ry="12"/><line x1="25" y1="30" x2="25" y2="90"/><line x1="95" y1="30" x2="95" y2="90"/><ellipse cx="60" cy="90" rx="35" ry="12"/></g></svg>' },
+
+  { type:'input', diff:'easy',
+    text:'Найдите площадь поверхности куба с ребром 3.',
+    correct:'54',
+    figure:'<svg viewBox="0 0 120 120"><g fill="none" stroke="#00d4ff" stroke-width="2.5" stroke-linejoin="round"><rect x="20" y="35" width="60" height="60" rx="2"/><polygon points="20,35 40,15 100,15 80,35"/><polygon points="80,35 100,15 100,75 80,95"/></g></svg>' },
+
+  { type:'input', diff:'mid',
+    text:'Объём шара радиуса 3 (ответ разделите на π).',
+    correct:'36',
+    figure:'<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="40" fill="none" stroke="#00d4ff" stroke-width="2.5"/><ellipse cx="60" cy="60" rx="40" ry="14" fill="none" stroke="#7c5cff" stroke-width="2" stroke-dasharray="4 4"/><line x1="60" y1="60" x2="100" y2="60" stroke="#ff6ec7" stroke-width="2"/><text x="75" y="56" fill="#ff6ec7" font-size="11" font-weight="bold">R</text></svg>' },
+
+  { type:'input', diff:'mid',
+    text:'Конус: R = 3, h = 4. Найдите S_бок/π.',
+    correct:'15',
+    hint:'Сначала найдите образующую: l = √(R² + h²). Потом S_бок = πRl.',
+    figure:'<svg viewBox="0 0 120 120"><g fill="none" stroke="#00d4ff" stroke-width="2.5"><ellipse cx="60" cy="90" rx="35" ry="12"/><line x1="60" y1="20" x2="25" y2="90"/><line x1="60" y1="20" x2="95" y2="90"/><line x1="60" y1="20" x2="60" y2="90" stroke="#ff6ec7" stroke-dasharray="3 3"/></g><text x="63" y="60" fill="#ff6ec7" font-size="11" font-weight="bold">h</text><text x="80" y="55" fill="#00d4ff" font-size="11" font-weight="bold">l</text></svg>' },
+
+  { type:'input', diff:'mid',
+    text:'Правильная четырёхугольная пирамида: сторона основания 6, высота 4. Найдите площадь боковой поверхности.',
+    correct:'60',
+    hint:'Апофема m = √(h² + (a/2)²). S_бок = 2·a·m для правильной четырёхугольной.',
+    figure:'<svg viewBox="0 0 120 120"><g fill="none" stroke="#00d4ff" stroke-width="2.5"><polygon points="60,20 15,95 105,95"/><line x1="60" y1="20" x2="60" y2="95" stroke="#ff6ec7" stroke-dasharray="3 3"/><line x1="15" y1="95" x2="60" y2="95" stroke="#a5a3c7"/><line x1="105" y1="95" x2="60" y2="95" stroke="#a5a3c7"/></g></svg>' },
+
+  { type:'input', diff:'hard',
+    text:'sin α = 3/5, α острый. Найдите sin 2α (ответ — десятичная дробь).',
+    correct:'0.96',
+    hint:'Найдите cos α = √(1 − sin²α). Потом sin 2α = 2 sin α cos α.',
+    figure:'<svg viewBox="0 0 120 120"><polygon points="20,100 100,100 100,40" fill="none" stroke="#00d4ff" stroke-width="2.5"/><polyline points="85,100 85,85 100,85" fill="none" stroke="#ff6ec7" stroke-width="2"/><text x="30" y="90" fill="#7c5cff" font-size="11">α</text></svg>' },
+
+  { type:'input', diff:'hard',
+    text:'Куб ABCDA₁B₁C₁D₁, ребро = 4. Найдите длину диагонали AC₁.',
+    correct:'6.93',
+    hint:'AC₁ = a√3.',
+    figure:'<svg viewBox="0 0 120 120"><g fill="none" stroke="#00d4ff" stroke-width="2.5" stroke-linejoin="round"><rect x="20" y="35" width="60" height="60" rx="2"/><polygon points="20,35 40,15 100,15 80,35"/><polygon points="80,35 100,15 100,75 80,95"/><line x1="20" y1="95" x2="100" y2="15" stroke="#ff6ec7" stroke-dasharray="4 3" stroke-width="2"/></g></svg>' },
+
+  { type:'input', diff:'hard',
+    text:'Цилиндр: R = 2, h = 5. Найдите полную площадь поверхности / π.',
+    correct:'28',
+    hint:'S_полн = 2πR(R + h). Разделить на π → 2R(R + h).',
+    figure:'<svg viewBox="0 0 120 120"><g fill="none" stroke="#00d4ff" stroke-width="2.5"><ellipse cx="60" cy="30" rx="35" ry="12"/><line x1="25" y1="30" x2="25" y2="90"/><line x1="95" y1="30" x2="95" y2="90"/><ellipse cx="60" cy="90" rx="35" ry="12"/></g></svg>' },
+
+  { type:'input', diff:'hard',
+    text:'Расстояние между точками A(1, 2, 3) и B(4, 6, 3).',
+    correct:'5',
+    hint:'AB = √((x₂−x₁)² + (y₂−y₁)² + (z₂−z₁)²).',
+    figure:'<svg viewBox="0 0 120 120"><g stroke="#00d4ff" stroke-width="2" fill="none"><line x1="20" y1="100" x2="100" y2="100"/><line x1="20" y1="100" x2="20" y2="20"/><line x1="20" y1="100" x2="50" y2="80"/></g><circle cx="40" cy="85" r="4" fill="#7c5cff"/><circle cx="85" cy="35" r="4" fill="#ff6ec7"/><text x="35" y="100" fill="#7c5cff" font-size="9" font-weight="bold">A</text><text x="90" y="35" fill="#ff6ec7" font-size="9" font-weight="bold">B</text><line x1="40" y1="85" x2="85" y2="35" stroke="#f1c40f" stroke-width="2" stroke-dasharray="4 3"/></svg>' },
+
+  { type:'input', diff:'hard',
+    text:'Правильная треугольная пирамида: сторона основания 6, апофема 5. Найдите S_бок.',
+    correct:'45',
+    hint:'S_бок = 3/2 · a · m для правильной треугольной пирамиды.',
+    figure:'<svg viewBox="0 0 120 120"><g fill="none" stroke="#00d4ff" stroke-width="2.5"><polygon points="60,20 15,95 105,95"/><line x1="60" y1="20" x2="60" y2="95" stroke="#ff6ec7" stroke-dasharray="3 3"/></g></svg>' },
+
+  { type:'input', diff:'hard',
+    text:'Теорема косинусов: a = 5, b = 8, угол C = 60°. Найдите c².',
+    correct:'49',
+    hint:'c² = a² + b² − 2ab·cos 60° = 25 + 64 − 2·5·8·0.5.',
+    figure:'<svg viewBox="0 0 120 120"><polygon points="20,95 100,95 60,20" fill="none" stroke="#00d4ff" stroke-width="2.5"/><text x="30" y="90" fill="#7c5cff" font-size="10">a</text><text x="82" y="90" fill="#7c5cff" font-size="10">b</text><text x="58" y="55" fill="#ff6ec7" font-size="10">c</text><text x="72" y="90" fill="#f1c40f" font-size="10">C</text></svg>' }
+];
+
+let state = { pool:[], index:0, answered:false, correctCount:0 };
+
+// ================= ХЕЛПЕРЫ =================
+function showPage(name){
+  ['home','dashboard','test'].forEach(p=>{
+    document.getElementById('page-'+p).classList.toggle('hidden', p!==name);
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function showError(msg){
+  const el = document.getElementById('form-error');
+  el.textContent = '⚠️ ' + msg;
+  el.classList.add('show');
+}
+function clearError(){ document.getElementById('form-error').classList.remove('show'); }
+function shakeField(el){
+  el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+  el.style.borderColor = 'var(--danger)';
+  setTimeout(()=>el.style.borderColor='', 1200);
+  el.focus();
+}
+
+// ================= РЕГИСТРАЦИЯ =================
+function register(){
+  const nameEl = document.getElementById('reg-name');
+  const passEl = document.getElementById('reg-pass');
+  const name = nameEl.value.trim();
+  const pass = passEl.value;
+  clearError();
+  if(!name && !pass){ shakeField(nameEl); return showError('Введите имя и пароль'); }
+  if(!name){ shakeField(nameEl); return showError('Введите имя'); }
+  if(pass.length < 4){ shakeField(passEl); return showError('Пароль должен быть не короче 4 символов'); }
+  try{ localStorage.setItem('math_user', name); }catch(e){}
+  document.getElementById('greeting').textContent = `Привет, ${name}! 👋`;
+  showPage('dashboard');
+}
+
+// ================= QR =================
+function initQR(){
+  const box = document.getElementById('qrcode');
+  const url = encodeURIComponent(window.location.href || 'https://example.com');
+  const img = new Image();
+  img.onload = () => { box.innerHTML = ''; img.style.display = 'block'; box.appendChild(img); };
+  img.onerror = () => { box.innerHTML = '<div class="qr-placeholder">QR-код недоступен<br>(нужен интернет)</div>'; };
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + url;
+  img.alt = 'QR-код';
+  img.width = 140; img.height = 140;
+}
+
+// ================= ТЕСТЫ =================
+function startTest(type){
+  state.index = 0;
+  state.correctCount = 0;
+
+  let pool;
+  if(type==='simple') pool = questions.filter(q=>q.type==='choice');
+  else if(type==='input') pool = questions.filter(q=>q.type==='input');
+  else {
+    // Смешанный: 20 случайных из всей базы
+    pool = [...questions].sort(()=>Math.random()-0.5).slice(0, Math.min(20, questions.length));
+  }
+  state.pool = pool.sort(()=>Math.random()-0.5);
+
+  const titles = {simple:'✅ Тест: выбор ответа', input:'✏️ Тест: ввод ответа', mixed:'🎲 Смешанный тест'};
+  document.getElementById('test-title').textContent = titles[type];
+  document.getElementById('next-btn').classList.remove('hidden');
+  showPage('test');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = state.pool[state.index];
+  if(!q) return finishTest();
+
+  state.answered = false;
+  const total = state.pool.length;
+  document.getElementById('test-counter').textContent = `${state.index+1} / ${total}`;
+  document.getElementById('progress-bar').style.width = `${(state.index/total)*100}%`;
+
+  const diffBadge = `<span class="difficulty diff-${q.diff}">${
+    q.diff==='easy'?'простой':q.diff==='mid'?'средний':'сложный'}</span>`;
+
+  const area = document.getElementById('question-area');
+  let html = '';
+  if(q.figure) html += `<div class="figure">${q.figure}</div>`;
+  html += `<div class="question-text">${q.text} ${diffBadge}</div>`;
+
+  if(q.type==='choice'){
+    q.options.forEach((opt)=>{
+      html += `<div class="test-option" data-opt="${escapeAttr(opt)}">${opt}</div>`;
+    });
+  } else {
+    html += `<input type="text" id="input-answer" placeholder="Введите ответ…" autocomplete="off">`;
+    html += `<button class="btn" id="check-btn">Проверить ✓</button>`;
+    if(q.hint) html += `<div class="hint-box">💡 Подсказка: ${q.hint}</div>`;
+  }
+
+  area.innerHTML = html;
+  document.getElementById('feedback-area').innerHTML = '';
+  document.getElementById('next-btn').textContent =
+    state.index===total-1 ? 'Завершить 🏁' : 'Следующий →';
+
+  if(q.type==='choice'){
+    area.querySelectorAll('.test-option').forEach(el=>{
+      el.addEventListener('click', ()=>checkChoice(el, q.correct));
+    });
+  } else {
+    const input = document.getElementById('input-answer');
+    document.getElementById('check-btn').addEventListener('click', ()=>checkInput(q.correct));
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') checkInput(q.correct); });
+    input.focus();
+  }
+}
+
+function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+
+function checkChoice(el, correct){
+  if(state.answered) return;
+  state.answered = true;
+  document.querySelectorAll('.test-option').forEach(o=>o.classList.add('disabled'));
+
+  const selected = el.getAttribute('data-opt');
+  if(selected === correct){
+    el.classList.add('correct');
+    state.correctCount++;
+    setFeedback(true, 'Верно! 🎉');
+  } else {
+    el.classList.add('wrong');
+    document.querySelectorAll('.test-option').forEach(o=>{
+      if(o.getAttribute('data-opt') === correct) o.classList.add('correct');
+    });
+    setFeedback(false, 'Неверно. Правильный ответ: ' + correct);
+  }
+}
+
+function checkInput(correct){
+  if(state.answered) return;
+  const input = document.getElementById('input-answer');
+  let val = input.value.trim().replace(',', '.');
+  if(!val){ shakeField(input); return; }
+  state.answered = true;
+
+  // Нормализация: допускаем "0.96", "0,96", "0.960"
+  const numsEqual = (a, b) => {
+    const na = parseFloat(a), nb = parseFloat(b);
+    if(isNaN(na) || isNaN(nb)) return a === b;
+    return Math.abs(na - nb) < 1e-6;
+  };
+
+  if(numsEqual(val, correct)){
+    state.correctCount++;
+    input.style.borderColor = 'var(--success)';
+    setFeedback(true, 'Верно! 🎉');
+  } else {
+    input.style.borderColor = 'var(--danger)';
+    setFeedback(false, 'Неверно. Правильный ответ: ' + correct);
+  }
+}
+
+function setFeedback(ok, msg){
+  document.getElementById('feedback-area').innerHTML =
+    `<div class="feedback ${ok?'ok':'bad'}">${msg}</div>`;
+}
+
+function nextQuestion(){
+  if(!state.answered){
+    setFeedback(false, 'Сначала ответь на вопрос 🙂');
+    return;
+  }
+  state.index++;
+  if(state.index >= state.pool.length) finishTest();
+  else renderQuestion();
+}
+
+function finishTest(){
+  const total = state.pool.length;
+  const pct = Math.round((state.correctCount/total)*100);
+  document.getElementById('progress-bar').style.width = '100%';
+  let msg = pct>=90 ? '🏆 Отлично! Уровень олимпиадника.'
+          : pct>=70 ? '💪 Хорошо! Ещё немного практики.'
+          : pct>=50 ? '📖 Средне. Повтори справочник.'
+          : '🔁 Стоит вернуться к теории.';
+  document.getElementById('question-area').innerHTML = `
+    <div style="text-align:center; padding:20px;">
+      <div style="font-size:56px; margin-bottom:12px;">${pct>=70?'🏆':'💪'}</div>
+      <h2 style="margin-bottom:8px;">Результат: ${state.correctCount} / ${total}</h2>
+      <p style="color:var(--muted); font-size:16px; margin-bottom:8px;">Правильных ответов: ${pct}%</p>
+      <p style="color:var(--accent-2); font-size:14px;">${msg}</p>
+    </div>`;
+  document.getElementById('feedback-area').innerHTML = '';
+  document.getElementById('next-btn').classList.add('hidden');
+  document.getElementById('test-counter').textContent = 'Готово';
+}
+
+// ================= ИНИЦИАЛИЗАЦИЯ =================
+document.addEventListener('DOMContentLoaded', () => {
+  initQR();
+  document.getElementById('start-btn').addEventListener('click', register);
+  ['reg-name','reg-pass'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.addEventListener('input', clearError);
+    el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); register(); } });
+  });
+  document.querySelectorAll('.card[data-action]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const act = card.getAttribute('data-action');
+      if(act === 'reference') document.getElementById('reference-content').classList.remove('hidden');
+      if(act === 'test-simple') startTest('simple');
+      if(act === 'test-input')  startTest('input');
+      if(act === 'test-mixed')  startTest('mixed');
+    });
+  });
+  document.getElementById('close-ref-btn').addEventListener('click', ()=>{
+    document.getElementById('reference-content').classList.add('hidden');
+  });
+  document.getElementById('logout-btn').addEventListener('click', ()=>{
+    try{ localStorage.removeItem('math_user'); }catch(e){}
+    document.getElementById('reg-name').value = '';
+    document.getElementById('reg-pass').value = '';
+    showPage('home');
+  });
+  document.getElementById('next-btn').addEventListener('click', nextQuestion);
+  document.getElementById('back-menu-btn').addEventListener('click', ()=>showPage('dashboard'));
+
+  let saved = null;
+  try{ saved = localStorage.getItem('math_user'); }catch(e){}
+  if(saved){
+    document.getElementById('greeting').textContent = `Привет, ${saved}! 👋`;
+    showPage('dashboard');
+  }
+});
+</script>
+</body>
+</html>
